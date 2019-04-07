@@ -1,0 +1,107 @@
+package sudoku;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+
+/**
+ *
+ * @author Michal Raczkiewicz
+ */
+public class generateBoardComented
+{
+    //Dla ulatwienia plansza do gry jest zmienna dostepna dla wszystkich metod.
+    static int[][] board = newBoardTemplate();
+    
+    //Ta metoda ma za zadanie rozpoczecie generowania tablicy.
+    //To ja wywoluje sie aby rozpoczac generowanie.
+    public static Boolean startGenerating()
+    {
+        //powtarzamy 9 razy bo mamy 9 rzedow
+        for (int i = 0; i != 9; i += 1)
+        {
+            //metoda generateRow zwraca wartosc boolowska w zalzenosci czy nastepuje konflikt przy generowaniu
+            //np. gdy w obecym rzedzie mamy juz wszystkie cyfry oprocz 8, ale w tej kolumnie 8 juz wystepuje
+            //program nie moze wpisac 8, poniewaz cyfra juz wystepuje w tej kolumnie
+            if (!generateRow(i))
+            {
+                //gdy konflikt nastapi plansza zostaje wyczyszczona i metoda zostaje uruchomiona od nowa
+                board = newBoardTemplate();
+                return startGenerating();
+            }
+        }
+        return true;
+    }
+    
+    //to metoda tymczasowa do pokazywania planszy
+    public static void printBoard()
+    {
+        for (int i = 0; i != 9; i += 1)
+        {
+            System.out.println (Arrays.toString(board[i]));
+        }
+    }
+    
+    //wypelnianie tablicy zerami
+    private static int[][] newBoardTemplate()
+    {
+        int[][] output = new int[9][9];
+        return output;
+    }
+    
+    //generowanie rzedu cyfr
+    //metoda przyjmuje zmienna row czyli numer rzedu ktory generujemy (od gory planszy)
+    private static Boolean generateRow(int row)
+    {
+        Random r = new Random();   
+        int j = 0;
+        //9 razy bo 9 cyfr w rzedzie
+        while (j != 9)
+        {
+            //losowa liczba z zakresu <1; 9>
+            int random = r.nextInt(9) + 1;
+            //to rejestr który bedziemy zwracac
+            //mozemy go zamienic na HashMape to duzo ulatwi
+            ArrayList<Integer> registry = generateRegistry(row, j);
+            //jesli rejestr NIE zawiera liczby to mozemy ja wpisac
+            if (!registry.contains(random))
+            {
+                //wpisujemy i dodajemy 1 do licznika
+                board[row][j] = random;
+                j += 1;
+            }
+            
+            //jesli rejestr zawiera wszystkie 9 cyfr, czyli jest pelny to wchodzimy do petli
+            if (registry.size() == 9)
+            {
+                //rejestr jest pelny, program nie moze wpisac rzadnej cyfry wiec zwraca wartosc false
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private static ArrayList<Integer> generateRegistry(int x, int y)
+    {
+        ArrayList<Integer> avaliable = new ArrayList<>();
+        for (int i = 0; i != 9; i += 1)
+        {
+            //tutaj dodajemy wszystkie cyfry ktore wystepuja w danej kolumnie i w danym rzedzie
+            //zamieniajac arraylist na hashmap mozemy to zoptymalizowac
+            if (!avaliable.contains(board[x][i]) && board[x][i] != 0) avaliable.add(board[x][i]);
+            if (!avaliable.contains(board[i][y]) && board[i][y] != 0) avaliable.add(board[i][y]);
+        }
+        
+        for (int i = 0; i != 3; i += 1)
+        {
+            x = x/3 * 3;
+            y = y/3 * 3;
+            for (int j = 0; j != 3; j += 1)
+            {
+                //a tutaj dodajemy wszystkie cyfry wystepujace w kwadracie
+                if (!avaliable.contains(board[x + i][y +j]) && board[x + i][y + j] != 0) avaliable.add(board[x + i][y +j]);
+            }
+        }
+        return avaliable;
+    }
+}
